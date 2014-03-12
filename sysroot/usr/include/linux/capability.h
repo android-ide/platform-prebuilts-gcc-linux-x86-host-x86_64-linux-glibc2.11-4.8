@@ -178,7 +178,7 @@ struct vfs_cap_data {
 /* Allow modification of routing tables */
 /* Allow setting arbitrary process / process group ownership on
    sockets */
-/* Allow binding to any address for transparent proxying */
+/* Allow binding to any address for transparent proxying (also via NET_RAW) */
 /* Allow setting TOS (type of service) */
 /* Allow setting promiscuous mode */
 /* Allow clearing driver statistics */
@@ -190,6 +190,7 @@ struct vfs_cap_data {
 
 /* Allow use of RAW sockets */
 /* Allow use of PACKET sockets */
+/* Allow binding to any address for transparent proxying (also via NET_ADMIN) */
 
 #define CAP_NET_RAW          13
 
@@ -226,7 +227,6 @@ struct vfs_cap_data {
 /* Allow configuration of the secure attention key */
 /* Allow administration of the random device */
 /* Allow examination and configuration of disk quotas */
-/* Allow configuring the kernel's syslog (printk behaviour) */
 /* Allow setting the domainname */
 /* Allow setting the hostname */
 /* Allow calling bdflush() */
@@ -332,7 +332,16 @@ struct vfs_cap_data {
 
 #define CAP_MAC_ADMIN        33
 
-#define CAP_LAST_CAP         CAP_MAC_ADMIN
+/* Allow configuring the kernel's syslog (printk behaviour) */
+
+#define CAP_SYSLOG           34
+
+/* Allow triggering something that will wake the system */
+
+#define CAP_WAKE_ALARM            35
+
+
+#define CAP_LAST_CAP         CAP_WAKE_ALARM
 
 #define cap_valid(x) ((x) >= 0 && (x) <= CAP_LAST_CAP)
 
