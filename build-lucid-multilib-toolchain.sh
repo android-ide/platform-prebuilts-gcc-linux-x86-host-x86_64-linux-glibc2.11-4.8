@@ -185,9 +185,10 @@ add_ubuntu_package \
 add_ubuntu_package \
     libx11-6 \
     libx11-dev \
-    libxcb1-dev \
     libxau6 \
+    libxcb1-dev \
     libxdmcp6 \
+    libxext-dev \
     x11proto-core-dev \
     x11proto-xext-dev \
     x11proto-input-dev \
@@ -491,6 +492,9 @@ sanitize_path_list ()
   RESULT=$(printf "%s\n" "$*" | tr ':' '\n' | awk '$1 != "" && $1 != "." { print $0; }' | tr '\n' ':')
   printf "%s" ${RESULT%:}
 }
+
+PATH=$(sanitize_path_list $PATH)
+LD_LIBRARY_PATH=$(sanitize_path_list $LD_LIBRARY_PATH)
 
 BUILD_DIR=$WORK_DIR/build
 mkdir -p $BUILD_DIR

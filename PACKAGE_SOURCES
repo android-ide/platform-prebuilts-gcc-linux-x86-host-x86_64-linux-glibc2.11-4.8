@@ -50,6 +50,8 @@ libxdmcp6_1.0.3-1_amd64.deb                                      b547c8ccb14c5f8
 libxdmcp6_1.0.3-1_i386.deb                                       9c6daaa2a4a7eee4f9e9a042f67cdbc84229627e
 libxext6_1.1.1-2_amd64.deb                                       b7e58668040bde7499f3bb73e6b703ae7514611b
 libxext6_1.1.1-2_i386.deb                                        1b2a8d3f1cbbd1856cd76345221059095a07db69
+libxext-dev_1.1.1-2_amd64.deb                                    58b288036cf5c77ce6e3396ef51e32d87f07e2ce
+libxext-dev_1.1.1-2_i386.deb                                     49b44c06c0c693457805407d41cdda25675eb47d
 libxfixes3_4.0.4-1_amd64.deb                                     d0223eeb0c16be26dbc15519eefbf43666634927
 libxfixes3_4.0.4-1_i386.deb                                      e3e9129452999ade9f72f6d0cb7b1dca8dc49af1
 libxxf86vm1_1.1.0-2_amd64.deb                                    a135a90a9a66de6c50e485f341523140415cef6e
