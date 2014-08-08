@@ -33,6 +33,7 @@
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stdint.h>  // TODO: Should pollute namespace less
 
 // NOTE: Defining __CLANG_ATOMICS when __clang__ is defined does not work and results in
 // broken "make checkbuild".
@@ -203,7 +204,9 @@ typedef _Atomic(long)			atomic_long;
 typedef _Atomic(unsigned long)		atomic_ulong;
 typedef _Atomic(long long)		atomic_llong;
 typedef _Atomic(unsigned long long)	atomic_ullong;
-#if __STDC_VERSION__ >= 201112L || __cplusplus >= 201103L
+#if __cplusplus >= 201103L
+  // Should define these for C11 as well, but only after including
+  // char16_t and char32_t definitions.
   typedef _Atomic(char16_t)		atomic_char16_t;
   typedef _Atomic(char32_t)		atomic_char32_t;
 #endif
