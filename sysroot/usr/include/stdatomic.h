@@ -33,7 +33,8 @@
 #include <sys/cdefs.h>
 #include <sys/types.h>
 #include <stdbool.h>
-#include <stdint.h>  // TODO: Should pollute namespace less
+#include <stddef.h>  // TODO: Should pollute namespace less
+#include <stdint.h>
 
 // NOTE: Defining __CLANG_ATOMICS when __clang__ is defined does not work and results in
 // broken "make checkbuild".
