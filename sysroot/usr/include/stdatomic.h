@@ -31,17 +31,112 @@
 #define	_STDATOMIC_H_
 
 #include <sys/cdefs.h>
+
+#if defined(__cplusplus) && defined(_USING_LIBCXX) && \
+    (__has_feature(cxx_atomic) || _GNUC_VER >= 407)
+
+/* We have a usable C++ <atomic>; use it instead.  */
+
+#include <atomic>
+
+#define _Atomic(t) std::atomic<t>
+
+using std::atomic_is_lock_free;
+using std::atomic_init;
+using std::atomic_store;
+using std::atomic_store_explicit;
+using std::atomic_load;
+using std::atomic_load_explicit;
+using std::atomic_exchange;
+using std::atomic_exchange_explicit;
+using std::atomic_compare_exchange_strong;
+using std::atomic_compare_exchange_strong_explicit;
+using std::atomic_compare_exchange_weak;
+using std::atomic_compare_exchange_weak_explicit;
+using std::atomic_fetch_add;
+using std::atomic_fetch_add_explicit;
+using std::atomic_fetch_sub;
+using std::atomic_fetch_sub_explicit;
+using std::atomic_fetch_or;
+using std::atomic_fetch_or_explicit;
+using std::atomic_fetch_xor;
+using std::atomic_fetch_xor_explicit;
+using std::atomic_fetch_and;
+using std::atomic_fetch_and_explicit;
+using std::atomic_thread_fence;
+using std::atomic_signal_fence;
+
+using std::memory_order;
+using std::memory_order_relaxed;
+using std::memory_order_consume;
+using std::memory_order_release;
+using std::memory_order_acq_rel;
+using std::memory_order_seq_cst;
+
+using std::atomic_bool;
+using std::atomic_char;
+using std::atomic_schar;
+using std::atomic_uchar;
+using std::atomic_short;
+using std::atomic_ushort;
+using std::atomic_int;
+using std::atomic_uint;
+using std::atomic_long;
+using std::atomic_ulong;
+using std::atomic_llong;
+using std::atomic_ullong;
+using std::atomic_char16_t;
+using std::atomic_char32_t;
+using std::atomic_wchar_t;
+using std::atomic_int_least8_t;
+using std::atomic_uint_least8_t;
+using std::atomic_int_least16_t;
+using std::atomic_uint_least16_t;
+using std::atomic_int_least32_t;
+using std::atomic_uint_least32_t;
+using std::atomic_int_least64_t;
+using std::atomic_uint_least64_t;
+using std::atomic_int_fast8_t;
+using std::atomic_uint_fast8_t;
+using std::atomic_int_fast16_t;
+using std::atomic_uint_fast16_t;
+using std::atomic_int_fast32_t;
+using std::atomic_uint_fast32_t;
+using std::atomic_int_fast64_t;
+using std::atomic_uint_fast64_t;
+using std::atomic_intptr_t;
+using std::atomic_uintptr_t;
+using std::atomic_size_t;
+using std::atomic_ptrdiff_t;
+using std::atomic_intmax_t;
+using std::atomic_uintmax_t;
+
+#else /* <atomic> unavailable, possibly because this is C, not C++ */
+
 #include <sys/types.h>
 #include <stdbool.h>
-#include <stddef.h>  // TODO: Should pollute namespace less
-#include <stdint.h>
 
-// NOTE: Defining __CLANG_ATOMICS when __clang__ is defined does not work and results in
-// broken "make checkbuild".
-#if defined(__clang__) || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
+/*
+ * C: Do it ourselves.
+ * Note that the runtime representation defined here should be compatible
+ * with the C++ one, i.e. an _Atomic(T) needs to contain the same
+ * bits as a T.
+ */
+
+#include <stddef.h>  /* For ptrdiff_t.                          */
+#include <stdint.h>  /* TODO: Should pollute namespace less.    */
+#if __STDC_VERSION__ >= 201112L
+# include <uchar.h>  /* For char16_t and char32_t.              */
+#endif
+
+#if __has_extension(c_atomic) || __has_extension(cxx_atomic)
+#define	__CLANG_ATOMICS
+#elif __GNUC_PREREQ__(4, 7)
 #define	__GNUC_ATOMICS
+#elif defined(__GNUC__)
+#define	__SYNC_ATOMICS
 #else
-#error "This header requires GCC 4.8 or higher"
+#error "stdatomic.h does not support your compiler"
 #endif
 
 /*
@@ -121,6 +216,8 @@
  *
  * The memory_order_* constants that denote the barrier behaviour of the
  * atomic operations.
+ * The enum values must be identical to those used by the
+ * C++ <atomic> header.
  */
 
 typedef enum {
@@ -137,7 +234,7 @@ typedef enum {
  */
 
 static __inline void
-atomic_thread_fence(memory_order __order)
+atomic_thread_fence(memory_order __order __attribute__((unused)))
 {
 
 #ifdef __CLANG_ATOMICS
@@ -150,7 +247,7 @@ atomic_thread_fence(memory_order __order)
 }
 
 static __inline void
-atomic_signal_fence(memory_order __order)
+atomic_signal_fence(memory_order __order __attribute__((unused)))
 {
 
 #ifdef __CLANG_ATOMICS
@@ -172,7 +269,7 @@ atomic_signal_fence(memory_order __order)
 	((void)(obj), (_Bool)1)
 #elif defined(__CLANG_ATOMICS)
 #define	atomic_is_lock_free(obj) \
-	__atomic_is_lock_free(sizeof(*(obj)), obj)
+	__c11_atomic_is_lock_free(sizeof(*(obj)))
 #elif defined(__GNUC_ATOMICS)
 #define	atomic_is_lock_free(obj) \
 	__atomic_is_lock_free(sizeof((obj)->__val), &(obj)->__val)
@@ -185,7 +282,7 @@ atomic_signal_fence(memory_order __order)
  * 7.17.6 Atomic integer types.
  */
 
-#ifndef __CLANG__
+#if !__has_extension(c_atomic) && !__has_extension(cxx_atomic)
 /*
  * No native support for _Atomic(). Place object in structure to prevent
  * most forms of direct non-atomic access.
@@ -205,9 +302,7 @@ typedef _Atomic(long)			atomic_long;
 typedef _Atomic(unsigned long)		atomic_ulong;
 typedef _Atomic(long long)		atomic_llong;
 typedef _Atomic(unsigned long long)	atomic_ullong;
-#if __cplusplus >= 201103L
-  // Should define these for C11 as well, but only after including
-  // char16_t and char32_t definitions.
+#if __STDC_VERSION__ >= 201112L || __cplusplus >= 201103L
   typedef _Atomic(char16_t)		atomic_char16_t;
   typedef _Atomic(char32_t)		atomic_char32_t;
 #endif
@@ -388,7 +483,7 @@ typedef struct {
 	atomic_bool	__flag;
 } atomic_flag;
 
-#define	ATOMIC_FLAG_INIT		{ ATOMIC_VAR_INIT(0) }
+#define	ATOMIC_FLAG_INIT		{ ATOMIC_VAR_INIT(false) }
 
 static __inline bool
 atomic_flag_test_and_set_explicit(volatile atomic_flag *__object,
@@ -420,5 +515,7 @@ atomic_flag_clear(volatile atomic_flag *__object)
 	atomic_flag_clear_explicit(__object, memory_order_seq_cst);
 }
 #endif /* !_KERNEL */
+
+#endif /* <atomic> unavailable */
 
 #endif /* !_STDATOMIC_H_ */
