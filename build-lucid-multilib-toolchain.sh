@@ -189,7 +189,10 @@ add_ubuntu_package \
     libxcb1-dev \
     libxdmcp6 \
     libxext-dev \
+    libxfixes-dev \
+    libxi-dev \
     x11proto-core-dev \
+    x11proto-fixes-dev \
     x11proto-xext-dev \
     x11proto-input-dev \
     x11proto-kb-dev
